@@ -1,181 +1,181 @@
-# Copilot Instructions for reactive-redis-coffe
+# Instruções Copilot para reactive-redis-coffe
 
-## Repository Overview
+## Visão Geral do Repositório
 
-**Project Type**: Spring Boot 2.1.6 reactive web application with Redis caching  
-**Language**: Java 8 (JDK 1.8)  
-**Build Tool**: Maven 3.x  
-**Framework**: Spring Boot with Spring WebFlux and Spring Data Redis Reactive  
-**Size**: Small (~6 Java files, 25MB with dependencies)  
-**Main Class**: `com.github.pedrobacchini.reactiverediscoffe.ReactiveRedisCoffeApplication`
+**Tipo de Projeto**: Aplicação web reativa Spring Boot 2.1.6 com cache Redis  
+**Linguagem**: Java 8 (JDK 1.8)  
+**Ferramenta de Build**: Maven 3.x  
+**Framework**: Spring Boot com Spring WebFlux e Spring Data Redis Reactive  
+**Tamanho**: Pequeno (~6 arquivos Java, 25MB com dependências)  
+**Classe Principal**: `com.github.pedrobacchini.reactiverediscoffe.ReactiveRedisCoffeApplication`
 
-This is a demo project showcasing reactive programming with Redis using Spring Boot. The application provides REST endpoints for managing coffee data stored in Redis, with reactive streams for real-time updates via Server-Sent Events (SSE).
+Este é um projeto de demonstração que apresenta programação reativa com Redis usando Spring Boot. A aplicação fornece endpoints REST para gerenciar dados de café armazenados no Redis, com streams reativos para atualizações em tempo real via Server-Sent Events (SSE).
 
-## Critical Build Requirements
+## Requisitos Críticos de Build
 
-### Java Version Requirement (CRITICAL)
-**ALWAYS use Java 8 (JDK 1.8) - the build WILL FAIL with newer Java versions.**
+### Requisito de Versão Java (CRÍTICO)
+**SEMPRE use Java 8 (JDK 1.8) - o build VAI FALHAR com versões mais recentes do Java.**
 
-The project uses Lombok with an older version that is incompatible with Java 11+. Using Java 17 (system default) will cause this error:
+O projeto usa Lombok com uma versão antiga que é incompatível com Java 11+. Usar Java 17 (padrão do sistema) causará este erro:
 ```
 Fatal error compiling: java.lang.IllegalAccessError: class lombok.javac.apt.LombokProcessor
 cannot access class com.sun.tools.javac.processing.JavacProcessingEnvironment
 ```
 
-**Required commands before ANY Maven operation:**
+**Comandos obrigatórios antes de QUALQUER operação Maven:**
 ```bash
 export JAVA_HOME=/usr/lib/jvm/temurin-8-jdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
-Verify Java version before building:
+Verifique a versão do Java antes de compilar:
 ```bash
-java -version  # Must show "1.8.0"
+java -version  # Deve mostrar "1.8.0"
 ```
 
-### Redis Requirement
-- **Compilation**: Works without Redis (use `-DskipTests` to skip tests)
-- **Testing**: Requires Redis running on localhost:6379
-- **Running**: Requires Redis running on localhost:6379
+### Requisito do Redis
+- **Compilação**: Funciona sem Redis (use `-DskipTests` para pular testes)
+- **Testes**: Requer Redis executando em localhost:6379
+- **Execução**: Requer Redis executando em localhost:6379
 
-To start Redis:
+Para iniciar o Redis:
 ```bash
 sudo service redis-server start
-redis-cli ping  # Should return PONG
+redis-cli ping  # Deve retornar PONG
 ```
 
-## Build Commands (Validated Sequence)
+## Comandos de Build (Sequência Validada)
 
-### 1. Clean the Project
+### 1. Limpar o Projeto
 ```bash
 export JAVA_HOME=/usr/lib/jvm/temurin-8-jdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 mvn clean
 ```
-**Time**: ~4-5 seconds  
-**No Redis required**
+**Tempo**: ~4-5 segundos  
+**Redis não é necessário**
 
-### 2. Compile Only (No Tests)
+### 2. Apenas Compilar (Sem Testes)
 ```bash
 export JAVA_HOME=/usr/lib/jvm/temurin-8-jdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 mvn clean compile
 ```
-**Time**: ~10-15 seconds (first run with dependency download)  
-**No Redis required**  
-**Success indicator**: `BUILD SUCCESS` with 5 source files compiled
+**Tempo**: ~10-15 segundos (primeira execução com download de dependências)  
+**Redis não é necessário**  
+**Indicador de sucesso**: `BUILD SUCCESS` com 5 arquivos fonte compilados
 
-### 3. Run Tests (Requires Redis)
+### 3. Executar Testes (Requer Redis)
 ```bash
-# Ensure Redis is running first
+# Certifique-se de que o Redis está executando primeiro
 sudo service redis-server start
-redis-cli ping  # Verify connection
+redis-cli ping  # Verificar conexão
 
 export JAVA_HOME=/usr/lib/jvm/temurin-8-jdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 mvn test
 ```
-**Time**: ~5-10 seconds  
-**Requires**: Redis running on localhost:6379  
-**Test Count**: 1 test (context load test)  
-**Expected Output**: Coffee data printed to console during test
+**Tempo**: ~5-10 segundos  
+**Requer**: Redis executando em localhost:6379  
+**Quantidade de Testes**: 1 teste (teste de carregamento de contexto)  
+**Saída Esperada**: Dados de café impressos no console durante o teste
 
-### 4. Package Application
+### 4. Empacotar Aplicação
 ```bash
 export JAVA_HOME=/usr/lib/jvm/temurin-8-jdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 mvn package
 ```
-**Time**: ~11-15 seconds  
-**Requires**: Redis running (for tests)  
-**Output**: Creates `target/reactive-redis-coffe-0.0.1-SNAPSHOT.jar`
+**Tempo**: ~11-15 segundos  
+**Requer**: Redis executando (para testes)  
+**Saída**: Cria `target/reactive-redis-coffe-0.0.1-SNAPSHOT.jar`
 
-### 5. Run Application
+### 5. Executar Aplicação
 ```bash
 export JAVA_HOME=/usr/lib/jvm/temurin-8-jdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 mvn spring-boot:run
 ```
-**Port**: 7878 (configured in application.properties)  
-**Requires**: Redis running on localhost:6379  
+**Porta**: 7878 (configurada em application.properties)  
+**Requer**: Redis executando em localhost:6379  
 **Endpoints**:
-- GET `/sse` - Server-Sent Events stream of coffee updates
-- POST `/` - Add new coffee (accepts JSON: `{"name": "Coffee Name"}`)
+- GET `/sse` - Stream de Server-Sent Events com atualizações de café
+- POST `/` - Adicionar novo café (aceita JSON: `{"name": "Nome do Café"}`)
 
-## Project Structure
+## Estrutura do Projeto
 
-### Key Files
+### Arquivos Principais
 ```
 .
-├── pom.xml                          # Maven build configuration
-├── .gitignore                       # Git ignore rules
+├── pom.xml                          # Configuração de build Maven
+├── .gitignore                       # Regras de ignore do Git
 └── src/
     ├── main/
     │   ├── java/com/github/pedrobacchini/reactiverediscoffe/
-    │   │   ├── ReactiveRedisCoffeApplication.java    # Main application entry point
+    │   │   ├── ReactiveRedisCoffeApplication.java    # Ponto de entrada principal da aplicação
     │   │   ├── domain/
-    │   │   │   └── Coffee.java                        # Domain model (uses Lombok @Data)
+    │   │   │   └── Coffee.java                        # Modelo de domínio (usa Lombok @Data)
     │   │   ├── config/
-    │   │   │   ├── CoffeeConfiguration.java           # Redis connection & serialization config
-    │   │   │   └── CoffeLoader.java                   # @PostConstruct data loader (seeds Redis)
+    │   │   │   ├── CoffeeConfiguration.java           # Configuração de conexão Redis e serialização
+    │   │   │   └── CoffeLoader.java                   # Carregador de dados @PostConstruct (popula Redis)
     │   │   └── resource/
-    │   │       └── CoffeController.java               # REST controller with SSE endpoint
+    │   │       └── CoffeController.java               # Controlador REST com endpoint SSE
     │   └── resources/
-    │       └── application.properties                 # Server port: 7878
+    │       └── application.properties                 # Porta do servidor: 7878
     └── test/
         └── java/com/github/pedrobacchini/reactiverediscoffe/
-            └── ReactiveRedisCoffeeApplicationTests.java  # Basic context load test
+            └── ReactiveRedisCoffeeApplicationTests.java  # Teste básico de carregamento de contexto
 ```
 
-### Architecture Components
-1. **Domain**: `Coffee` entity with id and name (Lombok-annotated)
-2. **Configuration**: Redis connection factory (localhost:6379) and reactive template setup
-3. **Data Loader**: `CoffeLoader` populates Redis with 3 coffee entries on startup
-4. **Controller**: REST endpoints with reactive publishers using `ReplayProcessor` for SSE
-5. **Redis Integration**: Reactive Redis operations with JSON serialization via Jackson
+### Componentes da Arquitetura
+1. **Domínio**: Entidade `Coffee` com id e nome (anotada com Lombok)
+2. **Configuração**: Factory de conexão Redis (localhost:6379) e configuração de template reativo
+3. **Carregador de Dados**: `CoffeLoader` popula Redis com 3 entradas de café na inicialização
+4. **Controlador**: Endpoints REST com publishers reativos usando `ReplayProcessor` para SSE
+5. **Integração Redis**: Operações reativas do Redis com serialização JSON via Jackson
 
-### Dependencies (from pom.xml)
+### Dependências (do pom.xml)
 - spring-boot-starter-data-redis-reactive
 - spring-boot-starter-webflux
-- spring-boot-devtools (runtime, optional)
-- lombok (optional, annotation processor)
-- spring-boot-starter-test (test scope)
-- reactor-test (test scope)
+- spring-boot-devtools (runtime, opcional)
+- lombok (opcional, processador de anotação)
+- spring-boot-starter-test (escopo de teste)
+- reactor-test (escopo de teste)
 
-## Common Issues & Solutions
+## Problemas Comuns e Soluções
 
-### Build fails with IllegalAccessError
-**Cause**: Not using Java 8  
-**Solution**: Set JAVA_HOME to Java 8 as shown above
+### Build falha com IllegalAccessError
+**Causa**: Não está usando Java 8  
+**Solução**: Configure JAVA_HOME para Java 8 conforme mostrado acima
 
-### Tests fail with "Unable to connect to Redis"
-**Cause**: Redis not running  
-**Solution**: Start Redis with `sudo service redis-server start`
+### Testes falham com "Unable to connect to Redis"
+**Causa**: Redis não está executando  
+**Solução**: Inicie o Redis com `sudo service redis-server start`
 
-### Application fails to start
-**Cause**: Redis not available or port 7878 in use  
-**Solution**: Check Redis status and ensure port 7878 is free
+### Aplicação falha ao iniciar
+**Causa**: Redis não disponível ou porta 7878 em uso  
+**Solução**: Verifique o status do Redis e certifique-se de que a porta 7878 está livre
 
-## Validation Steps
+## Etapas de Validação
 
-After making code changes:
-1. **Set Java 8 environment** (always first step)
-2. **Ensure Redis is running** (for tests/runtime)
-3. **Clean and compile**: `mvn clean compile`
-4. **Run tests**: `mvn test` (if tests exist for your changes)
-5. **Package**: `mvn package` to create executable JAR
-6. **Manual verification**: Run with `mvn spring-boot:run` and test endpoints with curl
+Após fazer alterações no código:
+1. **Configure o ambiente Java 8** (sempre o primeiro passo)
+2. **Certifique-se de que o Redis está executando** (para testes/execução)
+3. **Limpe e compile**: `mvn clean compile`
+4. **Execute os testes**: `mvn test` (se existirem testes para suas alterações)
+5. **Empacote**: `mvn package` para criar o JAR executável
+6. **Verificação manual**: Execute com `mvn spring-boot:run` e teste os endpoints com curl
 
-## Important Notes
+## Observações Importantes
 
-- **No GitHub Actions/CI**: This repository has no automated CI/CD workflows
-- **No linting configuration**: No checkstyle, PMD, or similar tools configured
-- **Minimal test coverage**: Only one basic test exists
-- **Development mode**: Uses spring-boot-devtools for hot reload
-- **Redis configuration**: Hardcoded to localhost:6379 in `CoffeeConfiguration.java`
-- **Server port**: Configured to 7878 in `application.properties` (not default 8080)
-- **Reactive patterns**: Uses Project Reactor with `ReplayProcessor` for event streaming
+- **Sem GitHub Actions/CI**: Este repositório não possui workflows automatizados de CI/CD
+- **Sem configuração de linting**: Não há checkstyle, PMD ou ferramentas similares configuradas
+- **Cobertura mínima de testes**: Existe apenas um teste básico
+- **Modo de desenvolvimento**: Usa spring-boot-devtools para hot reload
+- **Configuração do Redis**: Hardcoded para localhost:6379 em `CoffeeConfiguration.java`
+- **Porta do servidor**: Configurada para 7878 em `application.properties` (não é a porta padrão 8080)
+- **Padrões reativos**: Usa Project Reactor com `ReplayProcessor` para streaming de eventos
 
-## Trust These Instructions
+## Confie Nestas Instruções
 
-These instructions have been validated by executing each command in the actual environment. Only search for additional information if these instructions are incomplete or you encounter errors not documented here.
+Estas instruções foram validadas executando cada comando no ambiente real. Busque informações adicionais apenas se estas instruções estiverem incompletas ou se você encontrar erros não documentados aqui.
